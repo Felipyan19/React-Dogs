@@ -6,7 +6,7 @@ import DogCard from "./../../Component/Card/index";
 import Footer from "./../../Component/Footer/index";
 import { saveInLocalStorage, getFromLocalStorage } from '../../utils/LocalStorage';
 
-const Hembras = () => {
+const Machos = () => {
 
   const [dataImg, setDataImg] = React.useState([]);
 
@@ -26,7 +26,7 @@ const Hembras = () => {
       <div style={{ margin: "60px auto" }} className="cards">
         {dataImg.map(
           (dog) =>
-            dog.genero === "Hembra" && (
+            dog.genero === "Macho" && (
               <Element name={`dog-card-${dog.id}`} key={dog.id}>
                 <div
                   style={{
@@ -46,4 +46,4 @@ const Hembras = () => {
   );
 };
 
-export default Hembras;
+export default Machos;
