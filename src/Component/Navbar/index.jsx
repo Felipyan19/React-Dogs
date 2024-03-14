@@ -10,31 +10,25 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import PetsIcon from "@mui/icons-material/Pets";
-import { styled } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
-import { useLocation } from "react-router-dom";
-import Autocomplete from "@mui/material/Autocomplete";
+import SearchIcon from "@mui/icons-material/Search";
+import { styled, alpha } from "@mui/material/styles";
+import InputBase from "@mui/material/InputBase";
+import { useNavigate, useLocation } from "react-router-dom";
 
-
+const pages = ["Hembras", "Machos", "Inscribir", "Adoptar"];
 
 const Navbar = styled(AppBar)(() => ({
   backgroundColor: "rgba(0, 0, 0, 0.5)",
   position: "fixed",
   top: 0,
   width: "100%",
+  zIndex: 999,
 }));
-
 function NavbarComponent() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [searchValue, setSearchValue] = React.useState(""); // Estado para almacenar el valor de búsqueda
+  const navigate = useNavigate();
   const location = useLocation();
-  const pages = ["Machos", "Hembras", "Registro"];
-const [options, setOptions] = React.useState([
-  "Labrador Retriever",
-  "Golden Retriever",
-  "Bulldog",
-  "Pastor Alemán",
-]); // Obtiene la ubicación actual del navegador
+  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [value, setValue] = React.useState(0);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -44,9 +38,47 @@ const [options, setOptions] = React.useState([
     setAnchorElNav(null);
   };
 
-  const handleSearchChange = (event, value) => {
-    setSearchValue(value); // Actualiza el estado con el valor de búsqueda
-  };
+  const Search = styled("div")(({ theme }) => ({
+    position: "relative",
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginLeft: 0,
+    width: "3.4rem",
+    [theme.breakpoints.up("md")]: {
+      marginLeft: theme.spacing(1),
+      width: "auto",
+    },
+  }));
+
+  const SearchIconWrapper = styled("div")(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: "100%",
+    position: "absolute",
+    pointerEvents: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }));
+
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: "inherit",
+    width: "100%",
+    "& .MuiInputBase-input": {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create("width"),
+      [theme.breakpoints.up("md")]: {
+        width: "12ch",
+        "&:focus": {
+          width: "20ch",
+        },
+      },
+    },
+  }));
 
   return (
     <Navbar position="mobile">
@@ -57,7 +89,7 @@ const [options, setOptions] = React.useState([
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            onClick={() => navigate("/")}
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -66,6 +98,7 @@ const [options, setOptions] = React.useState([
               letterSpacing: ".3rem",
               color: "inherit",
               textDecoration: "none",
+             cursor: "pointer",
             }}
           >
             DOGS
@@ -101,7 +134,24 @@ const [options, setOptions] = React.useState([
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem
+                  key={page}
+                  onClick={() => {
+                    navigate(`/${page}`);
+                    handleCloseNavMenu();
+                  }}
+                  sx={{
+                    my: 2,
+                    color: "white",
+                    display: "block",
+                    fontWeight:
+                      location.pathname === `/${page}` ? "bold" : "normal",
+                    textShadow:
+                      location.pathname === `/${page}`
+                        ? "0 0 3px #000000, 0 0 5px #000000"
+                        : "none",
+                  }}
+                >
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
@@ -112,7 +162,7 @@ const [options, setOptions] = React.useState([
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            onClick={() => navigate("/")}
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -122,6 +172,7 @@ const [options, setOptions] = React.useState([
               letterSpacing: ".3rem",
               color: "inherit",
               textDecoration: "none",
+              cursor: "pointer"
             }}
           >
             DOGS
@@ -130,29 +181,37 @@ const [options, setOptions] = React.useState([
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => {
+                  navigate(`/${page}`);
+                  handleCloseNavMenu();
+                }}
                 sx={{
                   my: 2,
                   color: "white",
                   display: "block",
                   fontWeight:
                     location.pathname === `/${page}` ? "bold" : "normal",
+                  textShadow:
+                    location.pathname === `/${page}`
+                      ? "0 0 3px #000000, 0 0 5px #000000"
+                      : "none",
                 }}
               >
                 {page}
               </Button>
             ))}
           </Box>
-          <Autocomplete
-            className="ml-5 mb-2"
-            //onChange={(event, newValue) => handleSearchChange(newValue)}
-            options={options}
-            size="small"
-            omClick={() => console.log("clicked")}
-            style={{ width: "17rem" ,zIndex: 10000 }}
-            sx={{ zIndex: 10000, position: "relative" }}
-            renderInput={(params) => <TextField {...params} label="Red" />}
-          />
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ "aria-label": "search" }}
+              onChange={() => setValue(event.target.value)}
+              value={value}
+            />
+          </Search>
         </Toolbar>
       </Container>
     </Navbar>
