@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import MobileStepper from "@mui/material/MobileStepper";
 import Typography from "@mui/material/Typography";
@@ -11,15 +11,30 @@ import { ThemeProvider } from "@mui/material/styles";
 import { images } from "../../images";
 import theme from "../../Theme";
 import { Link } from "react-scroll";
-
+import { saveInLocalStorage, getFromLocalStorage } from '../../utils/LocalStorage';
 
 
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 function Carrousel({setActiveCard}) {
 
-  const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = images.length;
+  const [dataImg, setDataImg] = useState([]);
+  const [activeStep, setActiveStep] = useState(0);
+  let maxSteps = dataImg.length;
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    const localStorageData = getFromLocalStorage('data');
+    if (localStorageData !== undefined) {
+      setDataImg(localStorageData);
+    } else {
+      setDataImg(images);
+      saveInLocalStorage('data', images);
+    }
+    setLoading(false);
+  }, []);
+
 
   const handleNext = () => {
     if (activeStep === maxSteps - 1) {
@@ -40,39 +55,48 @@ function Carrousel({setActiveCard}) {
   const handleStepChange = (step) => {
     setActiveStep(step);
   };
-
+  if (loading) {
+    // Si se está cargando, muestra un indicador de carga
+    return <div>Cargando...</div>;
+  }
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            background: `radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,1) 100%), url(${images[activeStep].imageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: -1,
-          },
-        }}
-      >
+<Box
+  sx={{
+    position: "relative",
+    height: "100vh",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    overflowX: 'hidden',
+    padding: "0 0 0 0",
+    margin: "0 0 0 0",
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      width: "100%",
+      height: "100vh", // Ajusta la altura máxima de la imagen al tamaño máximo de la pantalla
+      background: `radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,1) 100%), url(${dataImg[activeStep].imageUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      zIndex: -1,
+    },
+  }}
+>
         <Typography
           variant="h6"
           component="div"
           sx={{
             marginBottom: "20px",
             color: theme.palette.primary.contrastText,
+            textAlign: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
           }}
         >
-          {images[activeStep].name}
+          {dataImg[activeStep]?.name }
         </Typography>
         <AutoPlaySwipeableViews
           axis={theme.direction === "rtl" ? "x-reverse" : "x"}
@@ -81,7 +105,7 @@ function Carrousel({setActiveCard}) {
           enableMouseEvents
           interval={5000}
         >
-          {images.map((step, index) => (
+          {dataImg?.map((step, index) => (
               <Link
               key={index}
               to={`dog-card-${index+1}`}
@@ -93,23 +117,20 @@ function Carrousel({setActiveCard}) {
             >
             <div
               key={step.label}
-              style={{ display: "flex", justifyContent: "center" }}
+              style={{ display: "flex", justifyContent: "center", alignItems: "center"}}
             >
               {Math.abs(activeStep - index) <= 2 ? (
                 <Box
                   component="img"
                   sx={{
-                    height: 400,
+                    maxHeight: 400,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    maxWidth: 600,
-                    overflow: "hidden",
-                    width: "100%",
+                    overflow: "overflow",
                   }}
                   src={step.imageUrl}
                   alt={step.name}
-                  onClick={() => console.log("click")}
                 />
               ) : null}
             </div>
